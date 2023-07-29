@@ -1,0 +1,8 @@
+include
+lib
+modules
+*.mod
+*.o
+tests/run
+.vscode
+Make.inc
