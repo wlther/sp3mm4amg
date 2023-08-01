@@ -8,7 +8,7 @@ program sp3mm_test
 
     real(8) :: end,start,elapsed
     type(psb_dspmat_type) :: tmp
-    type(psb_d_csr_sparse_mat) :: r, ac, p, oracle_out, out_to_check
+    type(psb_d_csr_sparse_mat) :: r, ac, p, oracle_out
     integer(psb_ipk_) :: info
     character(len = 128) :: input_argument_1, input_argument_2, &
     input_argument_3, input_argument_4
@@ -16,7 +16,7 @@ program sp3mm_test
     character(len=3), parameter :: out_fmt = 'CSR'
     type(sp3mm_config) :: cfg
     integer, dimension(3) :: kind_chunk_monotonic
-    
+
     cfg%rows = 20
     cfg%cols = 2
     cfg%symb_mm_row_impl_id = 0
@@ -77,8 +77,7 @@ program sp3mm_test
         end if
     end if
 
-
-    call get_config(cfg, info)
+    call cfg%get_config(info)
     if (info /= 0) then
         print *, 'configuration changed from environnement'
         info = 0
@@ -105,27 +104,38 @@ program sp3mm_test
     ! test SP3MM as pair of SPMM: RAC = R * AC; RACP = RAC * P
     write (*, '(A, "CHECKING UPPERBOUND IMPLEMENTATIONS", A)')&
     achar(27) // "[1;32m", achar(27) // "[0m"
-
+    
     write (*, '(A, "@computing Sp3MM as pair of serial SpMM", A)')&
     achar(27) // "[1;32m", achar(27) // "[0m"
-    start = omp_get_wtime()
     call test_sp3mm_pair_serial(r, ac, p, oracle_out, cfg, info)
     if (info /= 0) then
         print *, 'sp3mm as pair of spmm_serial failed'
         goto 9999
     end if
-    end = omp_get_wtime()
 
     write (*, '(A, "@computing Sp3MM as pair of SpMM UpperBounded", A)')&
     achar(27) // "[1;32m", achar(27) // "[0m"
-    start = omp_get_wtime()
-    call test_sp3mm_pair_UB(r, ac, p, oracle_out, cfg, info)
+    
+    call test_sp3mm_pair_ub(r, ac, p, oracle_out, cfg, info)
     if (info /= 0) then
         print *, 'sp3mm as pair of spmm_row_by_row_ub failed'
         goto 9999
     end if
-    end = omp_get_wtime()
 
-    print *, 'sp3mm as pair of spmm_row_by_row_ub :', end - start
+    write (*, '(A, "@computing Sp3MM as pair of SpMM 1D blocks UpperBounded", A)')&
+    achar(27) // "[1;32m", achar(27) // "[0m"
+
+    cfg%rows = cfg%thread_num * 2
+    call test_sp3mm_pair_1D_block_ub(r, ac, p, oracle_out, cfg, info)
+    if (info /= 0) then
+        print *, 'sp3mm as pair of spmm_row_by_row_ub failed'
+        goto 9999
+    end if
+
 9999 continue
+    call r%free()
+    call ac%free()
+    call p%free()
+    call oracle_out%free()
+    call tmp%free()
 end program sp3mm_test

@@ -9,10 +9,11 @@ module sp3mm_config_mod
     integer(psb_ipk_) :: thread_num
     
     procedure(chunk_distrib), pointer :: chunk_distrib_func
-
+    
     contains
     
     procedure :: set_chunk_distrib_func => set_chunk_distrib_func_impl
+    procedure :: get_config => get_config_impl
 
     end type sp3mm_config
 
@@ -182,7 +183,7 @@ module sp3mm_config_mod
         end select
     end subroutine set_chunk_distrib_func_impl
 
-    subroutine get_config(cfg, info)
+    subroutine get_config_impl(cfg, info)
         class(sp3mm_config), intent(inout) :: cfg
         integer(psb_ipk_), intent(out) :: info
 
@@ -202,5 +203,5 @@ module sp3mm_config_mod
             read(str_value, *, iostat = info) cfg%rows
             info = 1
         end if
-    end subroutine get_config
+    end subroutine get_config_impl
 end module sp3mm_config_mod
