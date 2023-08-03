@@ -125,12 +125,11 @@ program sp3mm_test
     write (*, '(A, "@computing Sp3MM as pair of SpMM 1D blocks UpperBounded", A)')&
     achar(27) // "[1;32m", achar(27) // "[0m"
 
-    cfg%rows = cfg%thread_num * 2
-    ! call test_sp3mm_pair_1D_block_ub(r, ac, p, oracle_out, cfg, info)
-    ! if (info /= 0) then
-    !     print *, 'sp3mm as pair of spmm_row_by_row_ub failed'
-    !     goto 9999
-    ! end if
+    call test_sp3mm_pair_1D_block_ub(r, ac, p, oracle_out, cfg, info)
+    if (info /= 0) then
+        print *, 'sp3mm as pair of spmm_row_by_row_ub_1D failed'
+        goto 9999
+    end if
 
     write (*, '(A, "CHECKING RBTREE IMPLEMENTATIONS", A)')&
     achar(27) // "[1;32m", achar(27) // "[0m"

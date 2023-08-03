@@ -1,6 +1,7 @@
 module spmm_mod
     use omp_lib
     use psb_base_mod
+    use sp3mm_const_mod
     use sp3mm_config_mod
     use sp3mm_acc_mod
     use idx_tree_mod
@@ -128,6 +129,58 @@ module spmm_mod
 
 
         end subroutine spmm_upper_bound_row_by_row
+
+        subroutine spmm_upper_bound_row_by_row_1D_blocks(a,b,c,cfg,info)
+            implicit none
+            type(psb_d_csr_sparse_mat), intent(in) :: a,b
+            type(psb_d_csr_sparse_mat), intent(out):: c
+            type(sp3mm_config), intent(in) :: cfg
+            integer(psb_ipk_), intent(out) :: info
+            
+            integer(psb_ipk_)   :: a_m, b_n, row_block, row_block_rem
+            integer(psb_ipk_)   :: grid_rows, block_size, row_start
+            integer(psb_ipk_), allocatable :: rows_sizes(:)
+            integer(psb_ipk_)   :: block_num, row, col
+            type(sparse_acc), allocatable :: sp_accs(:)
+
+            a_m = a%get_nrows()
+            b_n = b%get_ncols()
+
+            write (*, '("spmm", A, "rows of A,", A, "full B", A, "M=", I0, " x N=", I0)')&
+            achar(9), achar(9), achar(9), a_m, b_n
+
+            call c%allocate(a_m, b_n)
+            
+            call spmm_size_uperbound(a, b, rows_sizes, info)
+            allocate(sp_accs(a_m))
+
+            grid_rows = omp_get_max_threads() * spmm_1D_block_iteration_factor
+            row_block = a_m / grid_rows
+            row_block_rem = mod(a_m, grid_rows)
+            
+            !$omp parallel do schedule(runtime) private(block_size, row_start)
+            do block_num = 0, grid_rows - 1
+                if (block_num < row_block_rem) then
+                    block_size = row_block + 1
+                else
+                    block_size = row_block
+                end if
+                row_start = (block_num) * row_block + min(block_num, row_block_rem) + 1
+                do row = row_start, row_start + block_size - 1
+                    call sp_accs(row)%init(rows_sizes(row))
+                    do col = a%irp(row), a%irp(row + 1) - 1
+                        call upper_bound_scalar_sparse_mul_row(sp_accs(row), &
+                                                    a%val(col), b, a%ja(col))
+                    end do
+                    call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%ja, info)
+                    call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%nnz_idxs, info)
+                    call psb_msort(sp_accs(row)%ja, sp_accs(row)%nnz_idxs)
+                end do
+            end do
+            !$omp end parallel do
+            call merge_rows(sp_accs, c)
+
+        end subroutine spmm_upper_bound_row_by_row_1D_blocks
 
         subroutine spmm_rb_tree_serial(a,b,c,cfg,info)
             implicit none
