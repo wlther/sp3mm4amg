@@ -8,7 +8,7 @@ HERE=.
 FINCLUDES=$(FMFLAG)$(HERE) $(FMFLAG)$(INCDIR) $(PSBLAS_INCLUDES)
 
 MODOBJS=sp3mm_const_mod.o sp3mm_config_mod.o \
-		sp3mm_utils_mod.o sp3mm_idx_tree_mod.o \
+		sp3mm_utils_mod.o sp3mm_acc_mod.o sp3mm_idx_tree_mod.o \
 		spmm_mod.o sp3mm_base_mod.o
 
 OBJS=$(MODOBJS)

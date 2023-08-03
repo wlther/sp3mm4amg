@@ -206,7 +206,7 @@ module idx_tree_mod
         r%left => node
     end subroutine rotate_left
     
-    subroutine scalar_sparse_row_mul(tree, scalar, mat, row_num)
+    subroutine rb_tree_scalar_sparse_row_mul(tree, scalar, mat, row_num)
         implicit none
         type(idx_tree), intent(inout) :: tree
         real(psb_dpk_), intent(in) :: scalar
@@ -219,7 +219,7 @@ module idx_tree_mod
             call tree%insert(mat%ja(i),scalar * mat%val(i))
         end do
 
-    end subroutine scalar_sparse_row_mul
+    end subroutine rb_tree_scalar_sparse_row_mul
 
     subroutine merge_trees(trees, mat)
         use omp_lib
