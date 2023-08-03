@@ -100,16 +100,6 @@ program sp3mm_test
     elapsed = end - start
 
     write (*, '("preparing time: ", ES12.6)') elapsed
-    write (*, '(A, "CHECKING RBTREE IMPLEMENTATIONS", A)')&
-    achar(27) // "[1;32m", achar(27) // "[0m"
-    
-    write (*, '(A, "@computing Sp3MM as pair of serial SpMM", A)')&
-    achar(27) // "[1;32m", achar(27) // "[0m"
-    call test_sp3mm_pair_rb_tree_serial(r, ac, p, oracle_out, cfg, info)
-    if (info /= 0) then
-        print *, 'sp3mm as pair of spmm_serial failed'
-        goto 9999
-    end if
 
     ! test SP3MM as pair of SPMM: RAC = R * AC; RACP = RAC * P
     write (*, '(A, "CHECKING UPPERBOUND IMPLEMENTATIONS", A)')&
@@ -141,6 +131,28 @@ program sp3mm_test
     !     print *, 'sp3mm as pair of spmm_row_by_row_ub failed'
     !     goto 9999
     ! end if
+
+    write (*, '(A, "CHECKING RBTREE IMPLEMENTATIONS", A)')&
+    achar(27) // "[1;32m", achar(27) // "[0m"
+    
+    write (*, '(A, "@computing Sp3MM as pair of serial SpMM", A)')&
+    achar(27) // "[1;32m", achar(27) // "[0m"
+    call test_sp3mm_pair_rb_tree_serial(r, ac, p, oracle_out, cfg, info)
+    if (info /= 0) then
+        print *, 'sp3mm as pair of spmm_serial failed'
+        goto 9999
+    end if
+
+    write (*, '(A, "@computing Sp3MM as pair of SpMM with RBTree", A)')&
+    achar(27) // "[1;32m", achar(27) // "[0m"
+    
+    call test_sp3mm_pair_rb_tree(r, ac, p, oracle_out, cfg, info)
+    if (info /= 0) then
+        print *, 'sp3mm as pair of spmm_row_by_row_ub failed'
+        goto 9999
+    end if
+
+
 
 9999 continue
     call r%free()

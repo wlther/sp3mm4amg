@@ -81,6 +81,9 @@ module spmm_mod
                 do col = a%irp(row), a%irp(row + 1) - 1
                     call upper_bound_scalar_sparse_mul_row(sp_accs(row), a%val(col), b, a%ja(col))
                 end do
+                call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%ja, info)
+                call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%nnz_idxs, info)
+                call psb_msort(sp_accs(row)%ja, sp_accs(row)%nnz_idxs)
             end do
             call merge_rows(sp_accs, c)
 
@@ -116,9 +119,13 @@ module spmm_mod
                 do col = a%irp(row), a%irp(row + 1) - 1
                     call upper_bound_scalar_sparse_mul_row(sp_accs(row), a%val(col), b, a%ja(col))
                 end do
+                call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%ja, info)
+                call psb_realloc(sp_accs(row)%nnz, sp_accs(row)%nnz_idxs, info)
+                call psb_msort(sp_accs(row)%ja, sp_accs(row)%nnz_idxs)
             end do
             !$omp end parallel do
             call merge_rows(sp_accs, c)
+
 
         end subroutine spmm_upper_bound_row_by_row
 

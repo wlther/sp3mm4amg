@@ -24,7 +24,8 @@ module sp3mm_acc_mod
 
         call psb_realloc(size, sp_acc%as, info)
         call psb_realloc(size, sp_acc%ja, info)
-        call psb_realloc(size, sp_acc%nnz_idxs, info)
+        sp_acc%nnz = 0
+        sp_acc%ja = 0
 
     end subroutine init_sparse_acc
 
@@ -35,51 +36,50 @@ module sp3mm_acc_mod
         integer(psb_ipk_), intent(in) :: row_num
 
         integer(psb_ipk_) :: i, k
-        sp_acc%nnz = 0
 
         do i = mat%irp(row_num), mat%irp(row_num + 1) - 1
-            do k = 1, sp_acc%nnz
+            k = 1
+            do while (k <= sp_acc%nnz)
                 if (sp_acc%ja(k) == mat%ja(i)) then
                     sp_acc%as(k) = sp_acc%as(k) + scalar * mat%val(i)
                     exit
                 end if
+                k = k + 1
             end do
-            sp_acc%nnz = sp_acc%nnz + 1
-            sp_acc%ja(sp_acc%nnz) = mat%ja(i)
-            sp_acc%as(sp_acc%nnz) = scalar * mat%val(i)
+            if (k > sp_acc%nnz) then 
+                sp_acc%nnz = sp_acc%nnz + 1
+                sp_acc%ja(sp_acc%nnz) = mat%ja(i)
+                sp_acc%as(sp_acc%nnz) = scalar * mat%val(i)
+            end if
         end do
     end subroutine upper_bound_scalar_sparse_mul_row
 
     subroutine merge_rows(sp_accs, mat)
-        use psb_util_mod
         type(sparse_acc), allocatable, intent(inout) :: sp_accs(:)
         type(psb_d_csr_sparse_mat), intent(inout) :: mat
 
-        integer(psb_ipk_) :: nnz, row, col
+        integer(psb_ipk_) :: nnz, i, j
         integer(psb_ipk_) :: info
 
         nnz = 0
         mat%irp(1) = 1
 
-        do row = 1, mat%get_nrows()
-            nnz = nnz + sp_accs(row)%nnz
-            mat%irp(row + 1) = nnz + 1
+        do i = 1, mat%get_nrows()
+            nnz = nnz + sp_accs(i)%nnz
+            mat%irp(i + 1) = nnz + 1
         end do
 
-        call psb_realloc(nnz, mat%ja, info)
         call psb_realloc(nnz, mat%val, info)
+        call psb_realloc(nnz, mat%ja, info)
 
-        !omp parallel do schedule(runtime)
-        print *,  mat%get_nrows()
-        do row = 1, mat%get_nrows()
-            call psb_msort(sp_accs(row)%ja(1:sp_accs(row)%nnz), sp_accs(row)%nnz_idxs(1:sp_accs(row)%nnz))
-            do col = 1, sp_accs(row)%nnz
-                ! print *, sp_accs(row)%nnz_idxs(1:sp_accs(row)%nnz)
-                mat%val(mat%irp(row) + col - 1) = sp_accs(row)%as(sp_accs(row)%nnz_idxs(col))
-                mat%ja(mat%irp(row) + col - 1) = sp_accs(row)%ja(col)
+        !$omp parallel do schedule(runtime)
+        do i = 1, mat%get_nrows()
+            do j = 1, sp_accs(i)%nnz
+                mat%val(mat%irp(i) + j - 1) = sp_accs(i)%as(sp_accs(i)%nnz_idxs(j))
+                mat%ja(mat%irp(i) + j - 1) = sp_accs(i)%ja(j)
             end do
         end do
-        !omp end parallel do
+        !$omp end parallel do
 
     end subroutine merge_rows
 end module sp3mm_acc_mod

@@ -69,10 +69,8 @@ contains
 
         start = omp_get_wtime()
         call spmm_upper_bound_serial(r, ac, rac, cfg, info)
-        ! call spmm_rb_tree_serial(r, ac, rac, cfg, info)
         if (info /= 0) return
-        ! call spmm_upper_bound_serial(rac, p, out_to_check, cfg, info)
-        call spmm_rb_tree_serial(rac, p, out_to_check, cfg, info)
+        call spmm_upper_bound_serial(rac, p, out_to_check, cfg, info)
         if (info /= 0) return
         end = omp_get_wtime()
         print *, 'sp3mm as pair of spmm_serial :', end - start
@@ -116,6 +114,7 @@ contains
         start = omp_get_wtime()
         call spmm_rb_tree_serial(r, ac, rac, cfg, info)
         if (info /= 0) return
+        print *, rac%get_nzeros()
         call spmm_rb_tree_serial(rac, p, out_to_check, cfg, info)
         if (info /= 0) return
         end = omp_get_wtime()

@@ -3,6 +3,6 @@ lib
 modules
 *.mod
 *.o
-tests/run
+tests/runs
 .vscode
 Make.inc
