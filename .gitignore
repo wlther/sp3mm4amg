@@ -3,6 +3,9 @@ lib
 modules
 *.mod
 *.o
+*.a
+*.so
 tests/runs
+tests/runs/*
 .vscode
 Make.inc
