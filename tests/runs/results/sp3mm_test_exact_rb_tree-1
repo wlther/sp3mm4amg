@@ -1,0 +1,20 @@
+#### ./sp3mm_test_exact_rb_tree ####
+# R: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_r.mtx
+# AC: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l001_ac.mtx
+# P: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_p.mtx
+# AC_{i+1}: 	data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_ac.mtx
+
+omp_get_max_threads:	12
+
+preparing time: 3.327761E+00
+spmm	rows of A,	full B	M=64000 x N=512000
+
+- computing rows:    9.330E-02
+
+- merging rows:    4.652E-02
+spmm	rows of A,	full B	M=64000 x N=64000
+
+- computing rows:    6.463E-02
+
+- merging rows:    1.380E-02
+./sp3mm_test_exact_rb_tree: 2.221355E-01

@@ -1,0 +1,10 @@
+#### ./sp3mm_test_serial ####
+# R: 		r
+# AC: 		ac
+# P: 		p
+# AC_{i+1}: 	ac_next
+
+omp_get_max_threads:	12
+
+preparing time: 3.544800E-02
+./sp3mm_test_serial: 8.987920E-04

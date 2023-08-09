@@ -1,10 +1,76 @@
 module sp3mm_test_mod
     use psb_base_mod
+    use psb_util_mod
     use sp3mm_base_mod
     use omp_lib
     implicit none
-    
+    integer(psb_ipk_), parameter :: iunit=12
+    character(len=3), parameter :: out_fmt = 'CSR'
+
 contains
+    subroutine get_test_matrices(r, ac, p, oracle_out)
+        type(psb_d_csr_sparse_mat), intent(out):: r, ac, p, oracle_out
+        
+        integer(psb_ipk_) :: info
+        character(len = 128) :: input_argument_1, input_argument_2, &
+        input_argument_3, input_argument_4
+        type(psb_dspmat_type) :: tmp
+
+        call get_command_argument(1, input_argument_1)
+        call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_1)
+        call tmp%cscnv(info, type=out_fmt)
+        call r%mv_from_fmt(tmp%a, info)
+        if (info /= 0) then
+            error stop 'Error during conversion MM -> CSR of R'
+        end if
+    
+        call get_command_argument(2, input_argument_2)
+        call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_2)
+        call tmp%cscnv(info, type=out_fmt)
+        call ac%mv_from_fmt(tmp%a, info)
+        if (info /= 0) then
+            error stop 'Error during conversion MM -> CSR of AC_{i}'
+        end if
+    
+        call get_command_argument(3, input_argument_3)
+        call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_3)
+        call tmp%cscnv(info, type=out_fmt)
+        call p%mv_from_fmt(tmp%a, info)
+        if (info /= 0) then
+            error stop 'Error during conversion MM -> CSR of P'
+        end if
+    
+        if (command_argument_count() > 3) then
+            call get_command_argument(4, input_argument_4)
+            call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_4)
+            call tmp%cscnv(info, type=out_fmt)
+            call oracle_out%mv_from_fmt(tmp%a, info)
+            if (info /= 0) then
+                error stop 'Error during conversion MM -> CSR of AC_{i+1}'
+            end if
+        else
+            input_argument_4 = ''
+            write (*, '(A)') 'No oracle was given to compare results of Sp3mm : generating with spmm_serial'
+    
+        end if
+    
+            ! consistency check (checking dimensions)
+        if (r%get_ncols() /= ac%get_nrows()) then
+            error stop 'Error: incompatible dimensions between r and ac'
+        end if
+        if (ac%get_ncols() /= p%get_nrows()) then
+            error stop 'Error: incompatible dimensions between ac and p'
+        end if
+        if (command_argument_count() > 3) then
+            if (r%get_nrows() /= oracle_out%get_nrows()) then
+                error stop 'Error: oracle has an incorrect number of rows'
+            end if
+            if (p%get_ncols() /= oracle_out%get_ncols()) then
+                error stop 'Error: oracle has an incorrect number of columns'
+            end if
+        end if
+    end subroutine get_test_matrices
+
     function spmm_is_eq(a,b,eps) result(is_eq)
         type(psb_d_csr_sparse_mat), intent(in) :: a,b
         real(psb_dpk_), optional, intent(in) :: eps
@@ -49,7 +115,7 @@ contains
                 return
             end if
             if (abs(a%val(i) - b%val(i)) >= eps_) then
-                print *, 'incompatible data values', a%val(i), b%val(i)
+                print *, 'incompatible data values at index', i, a%val(i), b%val(i)
                 return
             end if
         end do
@@ -58,139 +124,4 @@ contains
         return
     end function spmm_is_eq
 
-    subroutine test_sp3mm_pair_ub_serial(r, ac, p, oracle, cfg, info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        call spmm_upper_bound_serial(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        call spmm_upper_bound_serial(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_serial :', end - start
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_ub_serial
-
-    subroutine test_sp3mm_pair_ub(r, ac, p, oracle, cfg, info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        call spmm_upper_bound_row_by_row(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        call spmm_upper_bound_row_by_row(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_upper_bound_row_by_row :', end - start
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_ub
-
-    subroutine test_sp3mm_pair_1D_block_ub(r, ac, p, oracle, cfg, info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        call spmm_upper_bound_row_by_row_1D_blocks(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        call spmm_upper_bound_row_by_row_1D_blocks(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_upper_bound_row_by_row_1D_blocks :', end - start
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_1D_block_ub
-
-    subroutine test_sp3mm_pair_rb_tree_serial(r,ac,p,oracle,cfg,info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        call spmm_rb_tree_serial(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        print *, rac%get_nzeros()
-        call spmm_rb_tree_serial(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_serial :', end - start
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_rb_tree_serial
-
-    subroutine test_sp3mm_pair_rb_tree(r,ac,p,oracle,cfg,info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        call spmm_rb_tree_row_by_row(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        call spmm_rb_tree_row_by_row(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_row_by_row_ub :', end - start
-
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_rb_tree
-
-    subroutine test_sp3mm_pair_rb_tree_1D_block(r,ac,p,oracle,cfg,info)
-        implicit none
-        type(psb_d_csr_sparse_mat), intent(in) :: r,ac,p,oracle
-        type(sp3mm_config), intent(in) :: cfg
-        integer(psb_ipk_), intent(out) :: info
-
-        real(8) :: end,start
-        type(psb_d_csr_sparse_mat) :: rac, out_to_check
-
-        start = omp_get_wtime()
-        ! call spmm_row_by_row_1D_blocks(r, ac, rac, cfg, info)
-        if (info /= 0) return
-        ! call spmm_row_by_row_1D_blocks(rac, p, out_to_check, cfg, info)
-        if (info /= 0) return
-        end = omp_get_wtime()
-        print *, 'sp3mm as pair of spmm_row_by_row_1D_block :', end - start
-
-
-        if (.not. spmm_is_eq(out_to_check, oracle)) info = 1
-
-        return
-    end subroutine test_sp3mm_pair_rb_tree_1D_block
-    
 end module sp3mm_test_mod

@@ -1,0 +1,22 @@
+#### ./sp3mm_test_upperbound_1D ####
+# R: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_r.mtx
+# AC: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l001_ac.mtx
+# P: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_p.mtx
+# AC_{i+1}: 	data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_ac.mtx
+
+omp_get_max_threads:	12
+
+preparing time: 3.314040E+00
+spmm	rows of A,	full B	M=64000 x N=512000
+spMMSizeUpperbound:3545600	6.373010E-04 s
+
+- computing rows:    3.034E-02
+
+- merging rows:    1.609E-02
+spmm	rows of A,	full B	M=64000 x N=64000
+spMMSizeUpperbound:2009600	1.967847E-03 s
+
+- computing rows:    3.733E-02
+
+- merging rows:    8.730E-03
+./sp3mm_test_upperbound_1D: 1.239322E-01

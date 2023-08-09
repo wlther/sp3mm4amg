@@ -5,7 +5,11 @@ modules
 *.o
 *.a
 *.so
-tests/runs
-tests/runs/*
+sp3mm_test_serial
+sp3mm_test_upperbound
+sp3mm_test_upperbound_1D
+sp3mm_test_exact_rb_tree
+sp3mm_test_exact_indices
 .vscode
 Make.inc
+gmon.out
