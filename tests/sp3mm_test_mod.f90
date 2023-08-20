@@ -1,7 +1,6 @@
 module sp3mm_test_mod
     use psb_base_mod
     use psb_util_mod
-    use sp3mm_base_mod
     use omp_lib
     implicit none
     integer(psb_ipk_), parameter :: iunit=12

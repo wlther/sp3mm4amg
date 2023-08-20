@@ -1,15 +1,12 @@
 #### ./sp3mm_test_omp ####
-# R: 		r
-# AC: 		ac
-# P: 		p
-# AC_{i+1}: 	ac_next
+# R: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_r.mtx
+# AC: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l001_ac.mtx
+# P: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_p.mtx
+# AC_{i+1}: 	data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_ac.mtx
 
 omp_get_max_threads:	12
 
-preparing time: 3.453482E-02
-spmm	rows of A,	full B	M=343 x N=2744
-spMMSizeUpperbound:83902	1.180400E-05 s
-spmm	rows of A,	full B	M=343 x N=343
-spMMSizeUpperbound:4072	2.793000E-06 s
-./sp3mm_test_omp: 2.601462E-03
- incompatible number of non zeros         344       11189
+preparing time: 3.206018E+00
+spmm	rows of A,	full B	M=64000 x N=512000
+spmm	rows of A,	full B	M=64000 x N=64000
+./sp3mm_test_omp: 7.240916E-02

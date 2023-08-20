@@ -10,12 +10,18 @@ EXEC_DIR=runs
 FINCLUDES=-I. -I$(SP3MM_INC_DIR) -I$(SP3MM_MOD_DIR) $(PSBLAS_INCLUDES)
 LINKOPT=-fopenmp
 
-all: exec_dir sp3mm_test_serial sp3mm_test_upperbound \
-	sp3mm_test_upperbound_1D sp3mm_test_exact_rb_tree \
-	sp3mm_test_exact_indices sp3mm_test_omp
+all: exec_dir sp3mm_test_serial sp3mm_test_omp
 
 exec_dir:
 	mkdir -p $(EXEC_DIR)
+
+sp3mm_test_serial: sp3mm_test_mod.o sp3mm_test_serial.o
+	$(FLINK) $(LINKOPT) $^ -o $@ $(SP3MM_LIBS) $(PSBLAS_LIBS) $(LDLIBS)
+	/bin/mv $@ $(EXEC_DIR)
+
+sp3mm_test_omp: sp3mm_test_mod.o sp3mm_test_omp.o
+	$(FLINK) $(LINKOPT) $^ -o $@ $(SP3MM_LIBS) $(PSBLAS_LIBS) $(LDLIBS)
+	/bin/mv $@ $(EXEC_DIR)
 
 sp3mm_test_%: sp3mm_test_mod.o sp3mm_test_%.o
 	$(FLINK) $(LINKOPT) $^ -o $@ $(SP3MM_LIBS) $(PSBLAS_LIBS) $(LDLIBS)

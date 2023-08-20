@@ -1,10 +1,10 @@
 #### ./sp3mm_test_serial ####
-# R: 		r
-# AC: 		ac
-# P: 		p
-# AC_{i+1}: 	ac_next
+# R: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_r.mtx
+# AC: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l001_ac.mtx
+# P: 		data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_p.mtx
+# AC_{i+1}: 	data/Matching/Large/Unsmoothed/dump_lev_d_p0_l002_ac.mtx
 
 omp_get_max_threads:	12
 
-preparing time: 3.544800E-02
-./sp3mm_test_serial: 8.987920E-04
+preparing time: 3.199668E+00
+./sp3mm_test_serial: 3.712684E-02

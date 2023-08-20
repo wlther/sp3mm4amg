@@ -1,6 +1,7 @@
 program sp3mm_test_omp
     use omp_lib
     use psb_base_mod
+    use sp3mm_base_mod
     use sp3mm_test_mod
     implicit none
     
