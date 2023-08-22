@@ -5,13 +5,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+sns.set()
+sns.set_palette("colorblind")
+
 csv_file = 'results.csv'
 
 dtypes = {'Implementation' : 'category',
-         'R' : 'category',
-         'AC': 'category',
-         'P' : 'category',
-         'AC_NEXT': 'category',
+         'Collection' : 'category',
+         'Size': 'category',
+         'Smoothing' : 'category',
+         'Level': 'category',
          'Preparation time': 'float64',
          'Threads': 'category',
          'N-RAC': 'int64',
@@ -26,16 +29,63 @@ dtypes = {'Implementation' : 'category',
 
 df = pd.read_csv(csv_file, dtype=dtypes)
 
-grouped = df.groupby(['R', 'Threads', 'Implementation'])
+grouped = df.groupby(['Collection', 'Size', 'Smoothing', 'Threads', 'Implementation', 'Level'])
 
-# Name of R should be in the following shape :
-# data/<collection>/<size>/<smoothing>/dump_lev_d_p0_l<level>_r.mtx
-collections_and_sizes = list(set(['/'.join(s.split('/')[1:3]) for s in df['R'].unique()]))
-print(collections_and_sizes)
+data = grouped[['Time-RAC', 'Time-RACP']].mean().reset_index()
 
-# sizes = list(set([s.split('/')[2] for s in df['R'].unique()]))
+data['Time-Combined'] = data['Time-RAC'] + data['Time-RACP']
 
-# data = sns.load_dataset()
-data = grouped['Time-RAC'].mean().reset_index()
-
-# sns.relplot(data=data, x='Threads', y='Time-RAC', hue='Implementation')
+for _,row in df[['Collection', 'Size', 'Smoothing']].drop_duplicates().iterrows():
+    collection = row['Collection']
+    size = row['Size']
+    smoothing = row['Smoothing']
+    
+    subset_data = data[(data["Collection"] == collection) & (data["Size"] == size) & (data["Smoothing"] == smoothing)]
+    
+    fig, axes = plt.subplots(1, 3, figsize=(18, 12))  # Create three subplots
+    
+    # Plot Time-RAC on the left subplot
+    sns.lineplot(
+        x="Threads",
+        y="Time-RAC",
+        hue="Implementation",
+        style="Level",
+        data=subset_data,
+        ax=axes[0],  # Specify the left subplot
+    )
+    axes[0].set_title(f"Time-RAC\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
+    axes[0].set_xlabel("Threads")
+    axes[0].set_ylabel("Time-RAC")
+    
+    # Plot Time-RACP on the middle subplot
+    sns.lineplot(
+        x="Threads",
+        y="Time-RACP",
+        hue="Implementation",
+        style="Level",
+        data=subset_data,
+        ax=axes[1],  # Specify the middle subplot
+    )
+    axes[1].set_title(f"Time-RACP\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
+    axes[1].set_xlabel("Threads")
+    axes[1].set_ylabel("Time-RACP")
+    
+    # Plot combined time on the right subplot
+    sns.lineplot(
+        x="Threads",
+        y="Time-Combined",
+        hue="Implementation",
+        style="Level",
+        data=subset_data,
+        ax=axes[2],  # Specify the right subplot
+    )
+    axes[2].set_title(f"Combined Time\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
+    axes[2].set_xlabel("Threads")
+    axes[2].set_ylabel("Combined Time")
+    
+    plt.tight_layout()
+    
+    pdf_filename = f"comparison_plot_{collection}_{size}_{smoothing}.pdf"
+    plt.savefig(pdf_filename)
+    
+    plt.close()

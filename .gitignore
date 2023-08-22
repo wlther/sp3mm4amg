@@ -6,6 +6,7 @@ modules
 *.a
 *.so
 *.csv
+*.pdf
 sp3mm_test_serial
 sp3mm_test_upperbound
 sp3mm_test_upperbound_1D
