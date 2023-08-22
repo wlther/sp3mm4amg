@@ -39,6 +39,9 @@ while [[ $# -gt 0 ]]; do
         --with-omp)
             selected_tests=$(printf "sp3mm_test_omp\n$selected_tests")
             shift ;;
+        --with-omp-1d)
+            selected_tests=$(printf "sp3mm_test_omp_1d\n$selected_tests")
+            shift ;;
         -i | --iterations)
             if [[ -n "$2" && "$2" =~ ^[0-9]+$ ]]; then
                 num_iterations="$2"

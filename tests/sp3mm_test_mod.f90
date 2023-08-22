@@ -2,6 +2,7 @@ module sp3mm_test_mod
     use psb_base_mod
     use psb_util_mod
     use omp_lib
+    use spmm_mod
     implicit none
     integer(psb_ipk_), parameter :: iunit=12
     character(len=3), parameter :: out_fmt = 'CSR'
@@ -10,6 +11,7 @@ contains
     subroutine get_test_matrices(r, ac, p, oracle_out)
         type(psb_d_csr_sparse_mat), intent(out):: r, ac, p, oracle_out
         
+        type(psb_d_csr_sparse_mat):: rac
         integer(psb_ipk_) :: info
         character(len = 128) :: input_argument_1, input_argument_2, &
         input_argument_3, input_argument_4
@@ -41,11 +43,18 @@ contains
     
         if (command_argument_count() > 3) then
             call get_command_argument(4, input_argument_4)
-            call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_4)
-            call tmp%cscnv(info, type=out_fmt)
-            call oracle_out%mv_from_fmt(tmp%a, info)
-            if (info /= 0) then
-                error stop 'Error during conversion MM -> CSR of AC_{i+1}'
+            if (input_argument_4 == '++') then
+                input_argument_4 = ''
+                write (*, '(A)') 'No oracle was given to compare results of Sp3mm : generating with spmm_serial'
+                call psb_dcsrspspmm(r, ac, rac, info)
+                call psb_dcsrspspmm(rac, p, oracle_out, info)
+            else
+                call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_4)
+                call tmp%cscnv(info, type=out_fmt)
+                call oracle_out%mv_from_fmt(tmp%a, info)
+                if (info /= 0) then
+                    error stop 'Error during conversion MM -> CSR of AC_{i+1}'
+                end if
             end if
         else
             input_argument_4 = ''

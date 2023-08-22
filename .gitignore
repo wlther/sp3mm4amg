@@ -5,12 +5,15 @@ modules
 *.o
 *.a
 *.so
+*.csv
 sp3mm_test_serial
 sp3mm_test_upperbound
 sp3mm_test_upperbound_1D
 sp3mm_test_exact_rb_tree
 sp3mm_test_exact_indices
 sp3mm_test_omp
+sp3mm_test_omp_1d
+sp3mm_test_omp_reversed
 .vscode
 Make.inc
 gmon.out
