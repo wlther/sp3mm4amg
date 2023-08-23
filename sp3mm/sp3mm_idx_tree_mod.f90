@@ -287,7 +287,7 @@ module idx_tree_mod
         call psb_realloc(mat%irp(rows + 1), mat%val, info)
         call psb_realloc(mat%irp(rows + 1), mat%ja, info)
 
-        !$omp parallel do schedule(runtime), private(current, previous, j)
+        !$omp parallel do schedule(static), private(current, previous, j)
         do i = 1, size(trees)
             j = 0
             current => trees(i)%root

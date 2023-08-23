@@ -416,7 +416,7 @@ module spmm_mod
             write (*,'("- computing indices: ", ES12.3)') toc - tic
 
             tic = omp_get_wtime()
-            !$omp parallel do schedule(runtime)
+            !$omp parallel do schedule(static)
             do row = 1, a_m
                 do col = a%irp(row), a%irp(row + 1) - 1
                     call direct_scalar_sparse_row_mul(c, row, a%val(col), b, a%ja(col))

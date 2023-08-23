@@ -17,23 +17,23 @@ dtypes = {'Implementation' : 'category',
          'Level': 'category',
          'Preparation time': 'float64',
          'Threads': 'category',
-         'N-RAC': 'int64',
-         'M-RAC': 'int64',
-         'NNZ-RAC': 'int64',
-         'Time-RAC': 'float64',
-         'N-RACP': 'int64',
-         'M-RACP': 'int64',
-         'NNZ-RACP': 'int64',
-         'Time-RACP': 'float64'
+         'N-1': 'int64',
+         'M-1': 'int64',
+         'NNZ-1': 'int64',
+         'Time-1': 'float64',
+         'N-2': 'int64',
+         'M-2': 'int64',
+         'NNZ-2': 'int64',
+         'Time-2': 'float64'
          }
 
 df = pd.read_csv(csv_file, dtype=dtypes)
 
 grouped = df.groupby(['Collection', 'Size', 'Smoothing', 'Threads', 'Implementation', 'Level'])
 
-data = grouped[['Time-RAC', 'Time-RACP']].mean().reset_index()
+data = grouped[['Time-1', 'Time-2']].mean().reset_index()
 
-data['Time-Combined'] = data['Time-RAC'] + data['Time-RACP']
+data['Time-Combined'] = data['Time-1'] + data['Time-2']
 
 for _,row in df[['Collection', 'Size', 'Smoothing']].drop_duplicates().iterrows():
     collection = row['Collection']
@@ -44,40 +44,37 @@ for _,row in df[['Collection', 'Size', 'Smoothing']].drop_duplicates().iterrows(
     
     fig, axes = plt.subplots(1, 3, figsize=(18, 12))  # Create three subplots
     
-    # Plot Time-RAC on the left subplot
     sns.lineplot(
         x="Threads",
-        y="Time-RAC",
+        y="Time-1",
         hue="Implementation",
         style="Level",
         data=subset_data,
-        ax=axes[0],  # Specify the left subplot
+        ax=axes[0],  # the left subplot
     )
-    axes[0].set_title(f"Time-RAC\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
+    axes[0].set_title(f"Time-1\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
     axes[0].set_xlabel("Threads")
-    axes[0].set_ylabel("Time-RAC")
+    axes[0].set_ylabel("Time-1")
     
-    # Plot Time-RACP on the middle subplot
     sns.lineplot(
         x="Threads",
-        y="Time-RACP",
+        y="Time-2",
         hue="Implementation",
         style="Level",
         data=subset_data,
-        ax=axes[1],  # Specify the middle subplot
+        ax=axes[1],  # middle subplot
     )
-    axes[1].set_title(f"Time-RACP\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
+    axes[1].set_title(f"Time-2\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
     axes[1].set_xlabel("Threads")
-    axes[1].set_ylabel("Time-RACP")
+    axes[1].set_ylabel("Time-2")
     
-    # Plot combined time on the right subplot
     sns.lineplot(
         x="Threads",
         y="Time-Combined",
         hue="Implementation",
         style="Level",
         data=subset_data,
-        ax=axes[2],  # Specify the right subplot
+        ax=axes[2],  # right subplot
     )
     axes[2].set_title(f"Combined Time\nCollection: {collection}, Size: {size}, Smoothing: {smoothing}")
     axes[2].set_xlabel("Threads")
