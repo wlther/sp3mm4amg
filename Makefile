@@ -24,8 +24,8 @@ cleanlib:
 	(cd modules; /bin/rm -f *.a *$(.mod) *$(.fh))
 
 veryclean: cleanlib
-	$(MAKE) -C sp3mm clean
-	$(MAKE) -C tests clean
+	$(MAKE) -C sp3mm veryclean
+	$(MAKE) -C tests veryclean
 
 clean:
 	$(MAKE) -C sp3mm clean
