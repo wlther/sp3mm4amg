@@ -16,7 +16,10 @@ contains
         character(len = 128) :: input_argument_1, input_argument_2, &
         input_argument_3, input_argument_4
         type(psb_dspmat_type) :: tmp
+        real(8) :: tic, toc
 
+        !$omp parallel private(tmp)
+        !$omp single
         call get_command_argument(1, input_argument_1)
         call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_1)
         call tmp%cscnv(info, type=out_fmt)
@@ -24,15 +27,23 @@ contains
         if (info /= 0) then
             error stop 'Error during conversion MM -> CSR of R'
         end if
-    
+        !$omp end single
+
+        !$omp single 
+        tic = omp_get_wtime()
         call get_command_argument(2, input_argument_2)
         call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_2)
+        toc = omp_get_wtime()
         call tmp%cscnv(info, type=out_fmt)
         call ac%mv_from_fmt(tmp%a, info)
+        print *, omp_get_wtime() - toc
         if (info /= 0) then
             error stop 'Error during conversion MM -> CSR of AC_{i}'
-        end if
-    
+        end if 
+        print *, toc - tic
+        !$omp end single
+
+        !$omp single 
         call get_command_argument(3, input_argument_3)
         call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_3)
         call tmp%cscnv(info, type=out_fmt)
@@ -40,7 +51,9 @@ contains
         if (info /= 0) then
             error stop 'Error during conversion MM -> CSR of P'
         end if
-    
+        !$omp end single
+
+        !$omp single
         if (command_argument_count() > 3) then
             call get_command_argument(4, input_argument_4)
             if (input_argument_4 == '++') then
@@ -61,8 +74,10 @@ contains
             write (*, '(A)') 'No oracle was given to compare results of Sp3mm : generating with spmm_serial'
     
         end if
-    
-            ! consistency check (checking dimensions)
+        !$omp end single
+        !$omp end parallel
+
+        ! consistency check (checking dimensions)
         if (r%get_ncols() /= ac%get_nrows()) then
             error stop 'Error: incompatible dimensions between r and ac'
         end if

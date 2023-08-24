@@ -18,9 +18,8 @@ while read -r program; do
         while [[ $threads -lt $max_procs ]]
         do
             export OMP_NUM_THREADS=$threads
-            for (( i = 1; i <= num_runs; i++ )); do
+            export SP3MM_ITERATIONS=$num_runs
             "./$program" $@ | tee -a "$results_dir/results.csv"
-            done
             threads=$(( 2 * $threads ))
         done
     else

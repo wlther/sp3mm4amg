@@ -25,7 +25,7 @@ cleanlib:
 
 veryclean: cleanlib
 	$(MAKE) -C sp3mm veryclean
-	$(MAKE) -C tests veryclean
+	$(MAKE) -C tests clean
 
 clean:
 	$(MAKE) -C sp3mm clean

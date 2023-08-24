@@ -7,6 +7,7 @@ modules
 *.so
 *.csv
 *.pdf
+*.conf
 sp3mm_test_serial
 sp3mm_test_serial_reversed
 sp3mm_test_omp_gustavson

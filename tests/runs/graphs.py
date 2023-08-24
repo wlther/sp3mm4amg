@@ -8,7 +8,7 @@ import seaborn as sns
 sns.set()
 sns.set_palette("colorblind")
 
-csv_file = 'results.csv'
+csv_file = 'results/results.csv'
 
 dtypes = {'Implementation' : 'category',
          'Collection' : 'category',
@@ -82,7 +82,7 @@ for _,row in df[['Collection', 'Size', 'Smoothing']].drop_duplicates().iterrows(
     
     plt.tight_layout()
     
-    pdf_filename = f"comparison_plot_{collection}_{size}_{smoothing}.pdf"
+    pdf_filename = f"results/comparison_plot_{collection}_{size}_{smoothing}.pdf"
     plt.savefig(pdf_filename)
     
     plt.close()
