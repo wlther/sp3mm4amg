@@ -166,4 +166,5 @@ program sp3mm_benchmark
             end do
         end do
     end do
+    deallocate(implementations)
 end program sp3mm_benchmark

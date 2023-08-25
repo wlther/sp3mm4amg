@@ -86,3 +86,5 @@ for _,row in df[['Collection', 'Size', 'Smoothing']].drop_duplicates().iterrows(
     plt.savefig(pdf_filename)
     
     plt.close()
+
+print(data.sort_values(by=['Time-Combined']))

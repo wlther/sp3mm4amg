@@ -39,7 +39,8 @@ contains
         call psb_realloc(nb, acc, info)
         
         allocate(offsets(omp_get_max_threads()))
-        !$omp parallel private(vals,col_inds,nnz,rwnz,thread_upperbound,acc,start_idx,end_idx) shared(a,b,c,offsets)
+        !$omp parallel private(vals,col_inds,nnz,rwnz,thread_upperbound,acc,start_idx,end_idx) &
+        !$omp shared(a,b,c,offsets) 
         thread_upperbound = 0
         start_idx = 0
         !$omp do schedule(static) private(irw, jj, j)
@@ -117,6 +118,7 @@ contains
         c%val(c%irp(start_idx):c%irp(start_idx) + nnz) = vals(1:nnz)
         c%ja(c%irp(start_idx):c%irp(start_idx) + nnz) = col_inds(1:nnz)
         !$omp end parallel
+        deallocate(offsets)
     end subroutine spmm_omp_gustavson
 
     subroutine spmm_omp_gustavson_1d(a,b,c,info)
@@ -234,6 +236,7 @@ contains
         c%val(c%irp(start_idx):c%irp(start_idx) + nnz) = vals(1:nnz)
         c%ja(c%irp(start_idx):c%irp(start_idx) + nnz) = col_inds(1:nnz)
         !$omp end parallel
+        deallocate(offsets)
     end subroutine spmm_omp_gustavson_1d
 
     subroutine spmm_serial_rb_tree(a,b,c,info)
@@ -249,8 +252,8 @@ contains
         a_m = a%get_nrows()
         b_n = b%get_ncols()
 
-        allocate(row_accs(a_m))
         call c%allocate(a_m, b_n)
+        allocate(row_accs(a_m))
 
         do row = 1, a_m
             row_accs(row)%nnz = 0
@@ -281,9 +284,7 @@ contains
         b_n = b%get_ncols()
 
         call c%allocate(a_m, b_n)
-
         allocate(row_accs(a_m))
-        call c%allocate(a_m, b_n)
 
         !$omp parallel do schedule(static)
         do row = 1, a_m

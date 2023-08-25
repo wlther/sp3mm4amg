@@ -24,6 +24,7 @@ dtypes = {'Implementation' : 'category',
 df = pd.read_csv(csv_file, dtype=dtypes)
 
 # Calculate a combined performance score for each row (implementation) based on Time-1 and Time-2
-df['Combined_Performance'] = df['Time-1'] + df['Time-2']
+df['Combined-Time'] = df['Time-1'] + df['Time-2']
 
-print(df.groupby(['Implementation']))
+for i in df.sort_values(by=['Combined-Time']).groupby(['Collection', 'Size', 'Smoothing']):
+    print(i)

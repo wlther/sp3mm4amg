@@ -316,5 +316,4 @@ module idx_tree_mod
         end do
         !$omp end parallel do
     end subroutine merge_trees_distrib
-    
 end module idx_tree_mod
