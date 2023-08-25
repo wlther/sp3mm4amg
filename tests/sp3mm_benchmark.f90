@@ -152,7 +152,7 @@ program sp3mm_benchmark
                     nnz = rac%get_nzeros()
                 end if
                 write (*, '(A,",",A,",",A,",",A,",",A,",",ES12.6,",",I0,",",I0,",",I0,",",&
-                        I0,",",ES12.6,",",I0,",",I0,",",I0,",",ES12.6)') &
+                        & I0,",",ES12.6,",",I0,",",I0,",",I0,",",ES12.6)') &
                                     trim(implementations(i)), trim(collection), &
                                     trim(size), trim(smoothing),&
                                     trim(level), preparing_time,&

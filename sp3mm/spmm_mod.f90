@@ -38,7 +38,7 @@ contains
         ! https://sc18.supercomputing.org/proceedings/workshops/workshop_files/ws_lasalss115s2-file1.pdf
         call psb_realloc(nb, acc, info)
         
-        allocate(offsets(omp_get_max_threads()))
+        allocate(offsets(omp_get_max_threads() + 1))
         !$omp parallel private(vals,col_inds,nnz,rwnz,thread_upperbound,acc,start_idx,end_idx) &
         !$omp shared(a,b,c,offsets) 
         thread_upperbound = 0
@@ -115,8 +115,8 @@ contains
         call psb_realloc(c%irp(ma + 1), c%ja, info)
         !$omp end single
         
-        c%val(c%irp(start_idx):c%irp(start_idx) + nnz) = vals(1:nnz)
-        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz) = col_inds(1:nnz)
+        c%val(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = vals(1:nnz)
+        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = col_inds(1:nnz)
         !$omp end parallel
         deallocate(offsets)
     end subroutine spmm_omp_gustavson
@@ -143,7 +143,7 @@ contains
         ! dense accumulator
         ! https://sc18.supercomputing.org/proceedings/workshops/workshop_files/ws_lasalss115s2-file1.pdf
         call psb_realloc(nb, acc, info)
-        allocate(offsets(omp_get_max_threads()))
+        allocate(offsets(omp_get_max_threads() + 1))
 
         nblks = 4 * omp_get_max_threads()
         rwblk = (ma / nblks)
@@ -233,8 +233,8 @@ contains
         call psb_realloc(c%irp(ma + 1), c%ja, info)
         !$omp end single
         
-        c%val(c%irp(start_idx):c%irp(start_idx) + nnz) = vals(1:nnz)
-        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz) = col_inds(1:nnz)
+        c%val(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = vals(1:nnz)
+        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = col_inds(1:nnz)
         !$omp end parallel
         deallocate(offsets)
     end subroutine spmm_omp_gustavson_1d
@@ -278,7 +278,6 @@ contains
         integer(psb_ipk_)   :: a_m, b_n
         integer(psb_ipk_)   :: row, col
         type(idx_tree), allocatable :: row_accs(:)
-        real(8) :: tic, toc
 
         a_m = a%get_nrows()
         b_n = b%get_ncols()
