@@ -16,7 +16,6 @@ contains
         character(len = 128) :: input_argument_1, input_argument_2, &
         input_argument_3, input_argument_4
         type(psb_dspmat_type) :: tmp
-        real(8) :: tic, toc
 
         !$omp parallel private(tmp)
         !$omp single
@@ -30,17 +29,13 @@ contains
         !$omp end single
 
         !$omp single 
-        tic = omp_get_wtime()
         call get_command_argument(2, input_argument_2)
         call mm_mat_read(tmp,info,iunit=iunit,filename=input_argument_2)
-        toc = omp_get_wtime()
         call tmp%cscnv(info, type=out_fmt)
         call ac%mv_from_fmt(tmp%a, info)
-        print *, omp_get_wtime() - toc
         if (info /= 0) then
             error stop 'Error during conversion MM -> CSR of AC_{i}'
         end if 
-        print *, toc - tic
         !$omp end single
 
         !$omp single 

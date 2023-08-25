@@ -5,6 +5,16 @@ module spmm_mod
     implicit none
     
 contains
+
+    subroutine spmm_serial(a,b,c,info)
+        implicit none
+        type(psb_d_csr_sparse_mat), intent(in) :: a,b
+        type(psb_d_csr_sparse_mat), intent(out):: c
+        integer(psb_ipk_), intent(out) :: info
+
+        call psb_dcsrspspmm(a,b,c,info)
+    end subroutine spmm_serial
+
     ! gustavson's algorithm using perfect hashing 
     ! and OpenMP parallelisation
     subroutine spmm_omp_gustavson(a,b,c,info)
@@ -17,7 +27,7 @@ contains
         integer(psb_ipk_)   :: ma, nb
         integer(psb_ipk_), allocatable :: col_inds(:), offsets(:)
         integer(psb_ipk_)   :: irw, jj, j, k, nnz, rwnz, thread_upperbound, start_idx, end_idx
-
+        
         ma = a%get_nrows()
         nb = b%get_ncols()
 

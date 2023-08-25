@@ -2,19 +2,21 @@
 
 settings_file="runs/test_settings.conf"
 num_iterations=1
+nb_selected_tests=0
 selected_tests=""
-default_tests="sp3mm_test_serial \
-            sp3mm_test_serial_reversed \
-            sp3mm_test_omp_gustavson \
-            sp3mm_test_omp_gustavson_reversed \
-            sp3mm_test_omp_gustavson_1d\
-            sp3mm_test_omp_gustavson_1d_reversed \
-            sp3mm_test_serial_rb_tree \
-            sp3mm_test_serial_rb_tree_reversed \
-            sp3mm_test_omp_rb_tree \
-            sp3mm_test_omp_rb_tree_reversed \
-            sp3mm_test_omp_two_pass \
-            sp3mm_test_omp_two_pass_reversed"
+nb_default_tests=12
+default_tests="serial \
+            serial_reversed \
+            omp_gustavson \
+            omp_gustavson_reversed \
+            omp_gustavson_1d\
+            omp_gustavson_1d_reversed \
+            serial_rb_tree \
+            serial_rb_tree_reversed \
+            omp_rb_tree \
+            omp_rb_tree_reversed \
+            omp_two_pass \
+            omp_two_pass_reversed"
 
 # Function to display script usage/help
 display_help() {
@@ -34,6 +36,7 @@ display_help() {
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --with-*)
+            nb_selected_tests=$(( $nb_selected_tests + 1 ))
             selected_tests="$selected_tests $(echo $1 | cut -d '-' -f 4-)"
             shift ;;
         -i | --iterations)
@@ -56,13 +59,16 @@ done
 
 # Add settings
 echo "$num_iterations" > "$settings_file"
+echo ".true." >> "$settings_file"
 
 if [[ $selected_tests == "" ]]; then
+    echo $nb_default_tests >> "$settings_file"
     for test in $default_tests
     do
         echo $test >> "$settings_file"
     done
 else
+    echo $nb_selected_tests >> "$settings_file"
     for test in $selected_tests
     do
         echo $test >> "$settings_file"
