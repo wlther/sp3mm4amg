@@ -117,6 +117,7 @@ contains
         
         c%val(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = vals(1:nnz)
         c%ja(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = col_inds(1:nnz)
+        deallocate(acc)
         !$omp end parallel
         deallocate(offsets)
     end subroutine spmm_omp_gustavson
