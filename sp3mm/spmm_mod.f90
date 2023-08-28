@@ -38,7 +38,7 @@ contains
         ! https://sc18.supercomputing.org/proceedings/workshops/workshop_files/ws_lasalss115s2-file1.pdf
         call psb_realloc(nb, acc, info)
         
-        allocate(offsets(omp_get_max_threads() + 1))
+        allocate(offsets(omp_get_max_threads()))
         !$omp parallel private(vals,col_inds,nnz,rwnz,thread_upperbound,acc,start_idx,end_idx) &
         !$omp shared(a,b,c,offsets) 
         thread_upperbound = 0
@@ -115,8 +115,8 @@ contains
         call psb_realloc(c%irp(ma + 1), c%ja, info)
         !$omp end single
         
-        c%val(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = vals(1:nnz)
-        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = col_inds(1:nnz)
+        c%val(c%irp(start_idx):c%irp(end_idx + 1) - 1) = vals(1:nnz)
+        c%ja(c%irp(start_idx):c%irp(end_idx + 1) - 1) = col_inds(1:nnz)
         deallocate(acc)
         !$omp end parallel
         deallocate(offsets)
@@ -144,7 +144,7 @@ contains
         ! dense accumulator
         ! https://sc18.supercomputing.org/proceedings/workshops/workshop_files/ws_lasalss115s2-file1.pdf
         call psb_realloc(nb, acc, info)
-        allocate(offsets(omp_get_max_threads() + 1))
+        allocate(offsets(omp_get_max_threads()))
 
         nblks = 4 * omp_get_max_threads()
         rwblk = (ma / nblks)
@@ -234,8 +234,8 @@ contains
         call psb_realloc(c%irp(ma + 1), c%ja, info)
         !$omp end single
         
-        c%val(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = vals(1:nnz)
-        c%ja(c%irp(start_idx):c%irp(start_idx) + nnz - 1) = col_inds(1:nnz)
+        c%val(c%irp(start_idx):c%irp(end_idx + 1) - 1) = vals(1:nnz)
+        c%ja(c%irp(start_idx):c%irp(end_idx + 1) - 1) = col_inds(1:nnz)
         !$omp end parallel
         deallocate(offsets)
     end subroutine spmm_omp_gustavson_1d

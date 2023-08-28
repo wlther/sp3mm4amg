@@ -151,6 +151,8 @@ program sp3mm_benchmark
                     ncols = rac%get_ncols()
                     nnz = rac%get_nzeros()
                 end if
+
+                if (.not. spmm_is_eq(out_to_check, oracle_out)) error stop
                 write (*, '(A,",",A,",",A,",",A,",",A,",",ES12.6,",",I0,",",I0,",",I0,",",&
                         & I0,",",ES12.6,",",I0,",",I0,",",I0,",",ES12.6)') &
                                     trim(implementations(i)), trim(collection), &
